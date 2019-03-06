@@ -1,0 +1,113 @@
+[Commands for Week 3]
+# Install Java
+$ sudo apt install openjdk-8-jdk
+
+# Create new group and user for hadoop
+$ sudo addgroup hadoop
+$ sudo adduser --ingroup hadoop hduser
+$ sudo visudo 
+	Add %hadoop under # Allow members of group sudo to execute any command
+
+# Login to Hduser
+$ su - hduser
+
+# Generate SSH Key for Hduser
+$ ssh-keygen -t rsa -P ""
+
+# Move SSH key to give access
+$ cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
+
+# Disable IPV6
+$ sudo nano /etc/sysctl.conf
+	add the following 
+	# disable ipv6
+	net.ipv6.conf.all.disable_ipv6 = 1
+	net.ipv6.conf.default.disable_ipv6 = 1
+	net.ipv6.conf.lo.disable_ipv6 = 1
+# To check IPv6 status
+$ cat /proc/sys/net/ipv6/conf/all/disable_ipv6
+
+# Download Hadoop 3.2.0
+# Create new mkdir at $HOME
+$ mkdir hadoop
+$ cd hadoop
+$ wget http://ftp.heanet.ie/mirrors/www.apache.org/dist/hadoop/common/hadoop-3.2.0/hadoop-3.2.0.tar.gz
+$ sudo tar xzf hadoop-3.2.0.tar.gz
+$ sudo chown -R hduser:hadoop hadoop-3.2.0
+
+# Update bashrc of hduser
+$ nano $HOME/.bashrc
+	Add Hadoop and Java Variable
+	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+	export HADOOP_HOME=/home/hduser/hadoop/hadoop-3.2.0
+	# Add Hadoop bin/ directory to PATH
+	export PATH=$PATH:$HADOOP_HOME/bin
+
+# Update hadoop-env.sh
+$ nano $HOME/hadoop/hadoop-3.2.0/etc/hadoop/hadoop-env.sh
+ export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
+$ source ~/.bashrc
+
+# HIVE 3.1.1 installation
+
+~$ mkdir hive
+~$ cd hive
+~$ wget 
+http://ftp.heanet.ie/mirrors/www.apache.org/dist/hive/hive-3.1.1/apache-hive-3.1.1-bin.tar.gz
+$ sudo tar xzf apache-hive-3.1.1-bin.tar.gz 
+~$ sudo chown -R hduser:hadoop hive
+ #add HIVE_HOME in bashrc	
+ export HIVE_HOME=/home/hduser/hive/apache-hive-3.1.1-bin
+ append :$HIVE_HOME/bin to export $PATH
+
+
+# Bootstrap locations used to store files on HDFS
+
+$ hdfs dfs -mkdir /tmp
+$ hdfs dfs -mkdir ~/user/hive/warehouse
+$ hdfs dfs -chmod g+w /tmp
+$ hdfs dfs -chmod g+w /user/hive/warehouse
+
+# Hive command line fix 
+	$ rm -rf metastore_db/
+	$ schematool -initSchema -dbType derby
+	
+# Edit the /hadoop/sbin/core-site.xml
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://localhost:9000</value>
+    </property>
+</configuration>
+
+# Reformat namenode 
+$ hdfs namenode -format 
+
+
+# Install Pig
+$ mkdir pig
+$ cd pig
+$ wget http://mirrors.whoishostingthis.com/apache/pig/pig-0.17.0/pig-0.17.0.tar.gz
+
+# Export PIG variable and append to $PATH
+
+$ nano ~/.bashrc
+ export PIG_HOME=$HOME/pig/pig-0.17.0
+ next append :$PIG_HOME/bin to $PATH
+
+# Create directory for MapReduce operations
+$ hdfs dfs -mkdir /user/hduser/
+
+
+# Insert this inside hdfs-site.xml
+        <property>
+                <name>dfs.name.dir</name>
+                <value>file:///home/hduser/hadoop-3.2.0/pseudo/dfs/name</value>
+        </property>
+        <property>
+                <name>dfs.data.dir</name>
+                <value>file:///home/hduser/hadoop-3.2.0/pseudo/dfs/data</value>
+        </property>
+
+# Format namenode after making above changes 
