@@ -23,7 +23,7 @@ Repo for data processing using Hadoop, Pig and Hive. The repo also provides a gu
 
 ## # Combine the dataset
 
-### To combine the whole results of the 5 queries, simple bash commands can be used (why bash?..I just find using bash easy to use)
+### To combine the whole results of the 5 queries, simple bash commands can be used (why bash?..I just find bash to use)
 ```
 $ echo \n >> Query5.csv
 
@@ -77,9 +77,15 @@ STORE A INTO 'result' USING org.apache.pig.piggybank.storage.CSVExcelStorage(','
 
 ### Create a file pig_script.pig and execute with mapreduce option
 `$ pig -x mapreduce pig_script.pig`
+
+<img src="docs/output/run_pig_script.png" alt="drawing" width="1920"/>
+
 ### The above script will generate a directory 'result' in hdfs, inside the directory there is file `part-m-0000` or similar which is the new generated CSV file
 
 `grunt> copyToLocal result 'Destination_path'`
+
+
+<img src="docs/output/copy_output_pig.png" alt="drawing" width="1920"/>
 
 ```
 $ cd result 
@@ -105,19 +111,25 @@ hive> load data local inpath 'Query.csv' overwrite into table stack;
 ### The top 10 posts by score 
 `hive> select Title, Score from stack order by Score desc limit 10;`
 
+<img src="docs/output/query1_hive.png" alt="drawing" width="1920"/>
 
 ### The top 10 users by post score 
 `hive> create table grouped_users as select ownerUserId as a, SUM(Score) as b from stack group by ownerUserId;`
 
 `hive> select * from grouped_users order by b desc limit 10;`
 
+<img src="docs/output/query2_hive.png" alt="drawing" width="1920"/>
+
+
 ### The number of distinct users, who used the word ‘hadoop’ in one of their posts
  
 `hive> select COUNT(DISTINCT OwnerUserId) from stack where Tags like '_hadoop_';`
 
+<img src="docs/output/query3_hive.png" alt="drawing" width="1920"/>
+
 ## # Calculate TF-IDF 
 
-### Below queries use HIVE MALL installation can be found [here](https://github.com/myui/hivemall/wiki/Installation) and [TF-IDF](https://github.com/myui/hivemall/wiki/TFIDF-calculation) 
+### Below queries use HIVE MALL. Installation can be found [here](https://github.com/myui/hivemall/wiki/Installation) and [TF-IDF](https://github.com/myui/hivemall/wiki/TFIDF-calculation) 
 ### _TF-IDF in Hive using HIVE MALL_
 ```
 hive> add jar /tmp/hivemall-core-0.4.2-rc.2-with-dependencies.jar;
@@ -141,3 +153,5 @@ hive> create or replace view tfidf as select tf.ownerUserId,  tf.word, tfidf(tf.
 
 hive> select * from tfidf;
 ```
+
+<img src="docs/output/tf-idf_hive.png" alt="drawing" width="1920"/>
