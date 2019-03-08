@@ -124,7 +124,7 @@ hive> load data local inpath 'Query.csv' overwrite into table stack;
 
 ### The number of distinct users, who used the word ‘hadoop’ in one of their posts
  
-`hive> select COUNT(DISTINCT OwnerUserId) from stack where Tags like '_hadoop_';`
+`hive> select COUNT(DISTINCT OwnerUserId) from stack where Tags like '%hadoop%';`
 
 <img src="docs/output/query3_hive.png" alt="drawing" width="1920"/>
 
